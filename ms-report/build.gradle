@@ -1,0 +1,95 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
+}
+
+group = 'com.onclass'
+version = '1.0.0'
+
+java {
+	sourceCompatibility = '21'
+	targetCompatibility = '21'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Reactive web + MongoDB (NOT R2DBC — this service uses MongoDB)
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.11.0'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+// JaCoCo Configuration for Code Coverage
+jacoco {
+	toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+		csv.required = false
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/dto/**',
+					'**/configuration/**',
+					'**/exception/**',
+					'**/MsReportApplication.class'
+			])
+		}))
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.70 // 70% minimum coverage
+			}
+		}
+		rule {
+			element = 'CLASS'
+			includes = ['com.onclass.report.domain.usecase.*']
+			limit {
+				minimum = 0.80 // 80% for use cases
+			}
+		}
+	}
+}
+
+// Custom task to run tests with coverage verification
+tasks.register('testWithCoverage') {
+	dependsOn test
+	dependsOn jacocoTestReport
+	dependsOn jacocoTestCoverageVerification
+}
+
+// Bootjar configuration
+bootJar {
+	archiveFileName = 'ms-report.jar'
+}

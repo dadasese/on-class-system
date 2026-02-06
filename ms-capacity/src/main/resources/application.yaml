@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: ms-capacity
+
+  # R2DBC Configuration for MySQL
+  r2dbc:
+    url: r2dbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:db_capacity}?useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:shibuya}
+    password: ${DB_PASSWORD:1212}
+    pool:
+      initial-size: 5
+      max-size: 20
+      max-idle-time: 30m
+      validation-query: SELECT 1
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8082}
+
+ms-technology:
+  base-url: ${TECHNOLOGY_URL:http://localhost:8081}
+  timeout: 5000
+
+# SpringDoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+  show-actuator: false
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.bootcamp.capacity: DEBUG
+    # Enable R2DBC query logging for development
+    io.r2dbc.mysql: DEBUG
+    io.r2dbc.mysql.QUERY: DEBUG
+    org.springframework.r2dbc: DEBUG
+    org.springframework.data.r2dbc: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+# Profile: docker
+spring:
+  config:
+    activate:
+      on-profile: docker
+  r2dbc:
+    url: r2dbc:mysql://mysql-capacity:3306/db_capacity?useSSL=false&allowPublicKeyRetrieval=true
+
+logging:
+  level:
+    io.r2dbc.mysql: INFO
+    io.r2dbc.mysql.QUERY: INFO
+    org.springframework.r2dbc: INFO
+
+---
+# Profile: test
+spring:
+  config:
+    activate:
+      on-profile: test
+  r2dbc:
+    url: r2dbc:h2:mem:///testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+
+logging:
+  level:
+    com.onclass.capacity: DEBUG
+    io.r2dbc: DEBUG

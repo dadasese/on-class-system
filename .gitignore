@@ -1,0 +1,94 @@
+# Gradle
+/.gradle/
+/build/
+/out/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# IDEs and OS
+/.idea/
+/*.iml
+/.classpath
+/.project
+/.settings/
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+tmp/
+*.tmp
+
+# Environment / secrets
+.env
+.env.local
+
+
+
+# Maven
+/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
+# Java
+*.class
+*.war
+*.ear
+
+# IDEs
+/.idea/
+/*.iml
+/.classpath
+/.project
+/.settings/
+
+# Gradle artifacts (if any appear)
+.gradle/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+tmp/
+*.tmp
+
+# Environment / secrets
+.env
+.env.local
+# Gradle
+/.gradle/
+/build/
+/out/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# IDEs and OS
+/.idea/
+/*.iml
+/.classpath
+/.project
+/.settings/
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+tmp/
+*.tmp
+
+# Environment / secrets
+.env
+.env.local

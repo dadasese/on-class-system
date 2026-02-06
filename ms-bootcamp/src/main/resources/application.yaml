@@ -1,0 +1,91 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: ms-bootcamp
+  r2dbc:
+    url: r2dbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:db_bootcamp}?useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USER:shibuya}
+    password: ${DB_PASSWORD:1212}
+    pool:
+      initial-size: 5
+      max-size: 20
+      max-idle-time: 30m
+
+ms-capacity:
+  base-url: ${CAPACITY_URL:http://localhost:8082}
+  timeout: 5000
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# application.yml
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 30s
+        failureRateThreshold: 50
+        slowCallRateThreshold: 80
+        slowCallDurationThreshold: 2s
+        recordExceptions:
+          - java.lang.Exception
+        ignoreExceptions:
+          - com.onclass.bootcamp.domain.exception.BootcampNotFoundException
+    instances:
+      capacityService:
+        baseConfig: default
+        waitDurationInOpenState: 20s
+        failureRateThreshold: 60
+
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.reactive.function.client.WebClientResponseException$ServiceUnavailable
+          - org.springframework.web.reactive.function.client.WebClientResponseException$GatewayTimeout
+    instances:
+      capacityService:
+        baseConfig: default
+        maxAttempts: 3
+
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+        cancelRunningFuture: true
+    instances:
+      capacityService:
+        baseConfig: default
+        timeoutDuration: 10s
+
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 25
+        maxWaitDuration: 500ms
+    instances:
+      capacityService:
+        maxConcurrentCalls: 10
+        maxWaitDuration: 1s
+
+logging:
+  level:
+    com.bootcamp.bootcamp: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG
+    org.springframework.r2dbc: DEBUG

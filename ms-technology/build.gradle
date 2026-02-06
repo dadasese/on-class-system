@@ -1,0 +1,118 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
+}
+
+group = 'com.onclass'
+version = '1.0.0'
+
+java {
+	sourceCompatibility = '21'
+	targetCompatibility = '21'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Spring WebFlux (Reactive Web)
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// Spring Data R2DBC (Reactive Database Access)
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+
+	// R2DBC MySQL Driver (latest stable)
+	runtimeOnly 'io.asyncer:r2dbc-mysql:1.3.0'
+
+	// MySQL Connector (for schema initialization if needed)
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// Validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// OpenAPI / Swagger (use 2.7.0+ for Spring Boot 3.4.x compatibility)
+	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.7.0'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// ==================== TEST DEPENDENCIES ====================
+
+	// Spring Boot Test (includes JUnit 5, AssertJ, Mockito)
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// Reactor Test (StepVerifier for testing reactive streams)
+	testImplementation 'io.projectreactor:reactor-test'
+
+	// H2 for integration tests
+	testRuntimeOnly 'com.h2database:h2'
+	testRuntimeOnly 'io.r2dbc:r2dbc-h2'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// Lombok for tests
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+// JaCoCo Configuration for Code Coverage
+jacoco {
+	toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+		csv.required = false
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/dto/**',
+					'**/configuration/**',
+					'**/exception/**',
+					'**/TechnologyApplication.class'
+			])
+		}))
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.70 // 70% minimum coverage
+			}
+		}
+		rule {
+			element = 'CLASS'
+			includes = ['com.onclass.technology.domain.usecase.*']
+			limit {
+				minimum = 0.80 // 80% for use cases
+			}
+		}
+	}
+}
+
+// Custom task to run tests with coverage verification
+tasks.register('testWithCoverage') {
+	dependsOn test
+	dependsOn jacocoTestReport
+	dependsOn jacocoTestCoverageVerification
+}
+
+// Bootjar configuration
+bootJar {
+	archiveFileName = 'ms-technology.jar'
+}

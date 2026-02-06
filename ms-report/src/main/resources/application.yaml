@@ -1,0 +1,37 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: ms-report
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_HOST:localhost}:27017/db_reporte
+      database: db_report
+      auto-index-creation: true
+
+  security:
+    user:
+      name: ${SECURITY_USER:admin}
+      password: ${SECURITY_PASS:admin123}
+
+# External service URLs
+ms-bootcamp:
+  base-url: ${BOOTCAMP_URL:http://localhost:8083}
+  timeout: 5000
+
+ms-person:
+  base-url: ${PERSON_URL:http://localhost:8084}
+  timeout: 5000
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.bootcamp.reporte: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.security: DEBUG
