@@ -10,17 +10,13 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 
-@Table("technologies")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Technology {
-    @Id
     private Long id;
-    @Column("name")
     private String name;
-    @Column("description")
     private String description;
 
 }
